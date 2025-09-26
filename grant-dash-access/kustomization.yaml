@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - clusterrole-user-reader.yaml
+  - clusterrole-perses-prometheus-api-editor.yaml
+  - clusterrolebinding-user1-reader.yaml
+  - clusterrolebinding-user1-perses-prometheus-api-editor.yaml
+  - rolebinding-user1-viewer-dashboard.yaml
+  - rolebinding-user1-viewer-datasource.yaml
