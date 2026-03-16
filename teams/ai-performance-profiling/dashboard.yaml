@@ -1,0 +1,865 @@
+apiVersion: perses.dev/v1alpha1
+kind: PersesDashboard
+metadata:
+    namespace: ai-performance-profiling
+    name: llm-load-test-performance
+spec:
+    display:
+        name: LLM Load Test Model Performance
+    variables:
+        - kind: ListVariable
+          spec:
+            display:
+                name: Model
+                hidden: false
+            defaultValue:
+                - $__all
+            allowAllValue: true
+            allowMultiple: true
+            customAllValue: .*
+            sort: alphabetical-asc
+            plugin:
+                kind: PrometheusLabelValuesVariable
+                spec:
+                    labelName: model
+                    matchers:
+                        - llm_load_test_tpot_mean_ms
+            name: model
+        - kind: ListVariable
+          spec:
+            display:
+                name: Namespace
+                hidden: false
+            defaultValue:
+                - $__all
+            allowAllValue: true
+            allowMultiple: true
+            customAllValue: .*
+            sort: alphabetical-asc
+            plugin:
+                kind: PrometheusLabelValuesVariable
+                spec:
+                    labelName: namespace
+                    matchers:
+                        - llm_load_test_tpot_mean_ms
+            name: namespace
+    panels:
+        "0_0":
+            kind: Panel
+            spec:
+                display:
+                    name: Response Time (ms)
+                    description: End-to-end request latency from send to final response, including network and inference time.
+                plugin:
+                    kind: TimeSeriesChart
+                    spec:
+                        legend:
+                            mode: table
+                            position: bottom
+                            values:
+                                - mean
+                                - last-number
+                        visual:
+                            areaOpacity: 0.1
+                            connectNulls: false
+                            display: line
+                            lineWidth: 2
+                        yAxis:
+                            format:
+                                unit: milliseconds
+                queries:
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                datasource:
+                                    kind: PrometheusDatasource
+                                query: llm_load_test_response_time_p99_ms{model=~"$model", namespace=~"$namespace"}
+                                seriesNameFormat: '{{model}} P99'
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                datasource:
+                                    kind: PrometheusDatasource
+                                query: llm_load_test_response_time_p95_ms{model=~"$model", namespace=~"$namespace"}
+                                seriesNameFormat: '{{model}} P95'
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                datasource:
+                                    kind: PrometheusDatasource
+                                query: llm_load_test_response_time_p90_ms{model=~"$model", namespace=~"$namespace"}
+                                seriesNameFormat: '{{model}} P90'
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                datasource:
+                                    kind: PrometheusDatasource
+                                query: llm_load_test_response_time_p80_ms{model=~"$model", namespace=~"$namespace"}
+                                seriesNameFormat: '{{model}} P80'
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                datasource:
+                                    kind: PrometheusDatasource
+                                query: llm_load_test_response_time_mean_ms{model=~"$model", namespace=~"$namespace"}
+                                seriesNameFormat: '{{model}} Mean'
+        "0_1":
+            kind: Panel
+            spec:
+                display:
+                    name: Time Per Output Token (ms)
+                    description: Time to generate each output token after the first. Lower values mean faster streaming generation.
+                plugin:
+                    kind: TimeSeriesChart
+                    spec:
+                        legend:
+                            mode: table
+                            position: bottom
+                            values:
+                                - mean
+                                - last-number
+                        visual:
+                            areaOpacity: 0.1
+                            connectNulls: false
+                            display: line
+                            lineWidth: 2
+                        yAxis:
+                            format:
+                                unit: milliseconds
+                queries:
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                datasource:
+                                    kind: PrometheusDatasource
+                                query: llm_load_test_tpot_p99_ms{model=~"$model", namespace=~"$namespace"}
+                                seriesNameFormat: '{{model}} P99'
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                datasource:
+                                    kind: PrometheusDatasource
+                                query: llm_load_test_tpot_p95_ms{model=~"$model", namespace=~"$namespace"}
+                                seriesNameFormat: '{{model}} P95'
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                datasource:
+                                    kind: PrometheusDatasource
+                                query: llm_load_test_tpot_p90_ms{model=~"$model", namespace=~"$namespace"}
+                                seriesNameFormat: '{{model}} P90'
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                datasource:
+                                    kind: PrometheusDatasource
+                                query: llm_load_test_tpot_p80_ms{model=~"$model", namespace=~"$namespace"}
+                                seriesNameFormat: '{{model}} P80'
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                datasource:
+                                    kind: PrometheusDatasource
+                                query: llm_load_test_tpot_mean_ms{model=~"$model", namespace=~"$namespace"}
+                                seriesNameFormat: '{{model}} Mean'
+        "0_2":
+            kind: Panel
+            spec:
+                display:
+                    name: Time to First Token (ms)
+                    description: Time from sending the request to receiving the first generated token. Measures initial responsiveness.
+                plugin:
+                    kind: TimeSeriesChart
+                    spec:
+                        legend:
+                            mode: table
+                            position: bottom
+                            values:
+                                - mean
+                                - last-number
+                        visual:
+                            areaOpacity: 0.1
+                            connectNulls: false
+                            display: line
+                            lineWidth: 2
+                        yAxis:
+                            format:
+                                unit: milliseconds
+                queries:
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                datasource:
+                                    kind: PrometheusDatasource
+                                query: llm_load_test_ttft_p99_ms{model=~"$model", namespace=~"$namespace"}
+                                seriesNameFormat: '{{model}} P99'
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                datasource:
+                                    kind: PrometheusDatasource
+                                query: llm_load_test_ttft_p95_ms{model=~"$model", namespace=~"$namespace"}
+                                seriesNameFormat: '{{model}} P95'
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                datasource:
+                                    kind: PrometheusDatasource
+                                query: llm_load_test_ttft_p90_ms{model=~"$model", namespace=~"$namespace"}
+                                seriesNameFormat: '{{model}} P90'
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                datasource:
+                                    kind: PrometheusDatasource
+                                query: llm_load_test_ttft_p80_ms{model=~"$model", namespace=~"$namespace"}
+                                seriesNameFormat: '{{model}} P80'
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                datasource:
+                                    kind: PrometheusDatasource
+                                query: llm_load_test_ttft_mean_ms{model=~"$model", namespace=~"$namespace"}
+                                seriesNameFormat: '{{model}} Mean'
+        "0_3":
+            kind: Panel
+            spec:
+                display:
+                    name: Inter-Token Latency (ms)
+                    description: Time between consecutive output tokens during streaming. Indicates how smooth the token stream feels to users.
+                plugin:
+                    kind: TimeSeriesChart
+                    spec:
+                        legend:
+                            mode: table
+                            position: bottom
+                            values:
+                                - mean
+                                - last-number
+                        visual:
+                            areaOpacity: 0.1
+                            connectNulls: false
+                            display: line
+                            lineWidth: 2
+                        yAxis:
+                            format:
+                                unit: milliseconds
+                queries:
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                datasource:
+                                    kind: PrometheusDatasource
+                                query: llm_load_test_itl_p99_ms{model=~"$model", namespace=~"$namespace"}
+                                seriesNameFormat: '{{model}} P99'
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                datasource:
+                                    kind: PrometheusDatasource
+                                query: llm_load_test_itl_p95_ms{model=~"$model", namespace=~"$namespace"}
+                                seriesNameFormat: '{{model}} P95'
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                datasource:
+                                    kind: PrometheusDatasource
+                                query: llm_load_test_itl_p90_ms{model=~"$model", namespace=~"$namespace"}
+                                seriesNameFormat: '{{model}} P90'
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                datasource:
+                                    kind: PrometheusDatasource
+                                query: llm_load_test_itl_p80_ms{model=~"$model", namespace=~"$namespace"}
+                                seriesNameFormat: '{{model}} P80'
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                datasource:
+                                    kind: PrometheusDatasource
+                                query: llm_load_test_itl_mean_ms{model=~"$model", namespace=~"$namespace"}
+                                seriesNameFormat: '{{model}} Mean'
+        "0_4":
+            kind: Panel
+            spec:
+                display:
+                    name: Time to Acknowledge (ms)
+                    description: Time from sending the request to the server's first acknowledgement, before any tokens are generated.
+                plugin:
+                    kind: TimeSeriesChart
+                    spec:
+                        legend:
+                            mode: table
+                            position: bottom
+                            values:
+                                - mean
+                                - last-number
+                        visual:
+                            areaOpacity: 0.1
+                            connectNulls: false
+                            display: line
+                            lineWidth: 2
+                        yAxis:
+                            format:
+                                unit: milliseconds
+                queries:
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                datasource:
+                                    kind: PrometheusDatasource
+                                query: llm_load_test_tt_ack_p99_ms{model=~"$model", namespace=~"$namespace"}
+                                seriesNameFormat: '{{model}} P99'
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                datasource:
+                                    kind: PrometheusDatasource
+                                query: llm_load_test_tt_ack_p95_ms{model=~"$model", namespace=~"$namespace"}
+                                seriesNameFormat: '{{model}} P95'
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                datasource:
+                                    kind: PrometheusDatasource
+                                query: llm_load_test_tt_ack_p90_ms{model=~"$model", namespace=~"$namespace"}
+                                seriesNameFormat: '{{model}} P90'
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                datasource:
+                                    kind: PrometheusDatasource
+                                query: llm_load_test_tt_ack_p80_ms{model=~"$model", namespace=~"$namespace"}
+                                seriesNameFormat: '{{model}} P80'
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                datasource:
+                                    kind: PrometheusDatasource
+                                query: llm_load_test_tt_ack_mean_ms{model=~"$model", namespace=~"$namespace"}
+                                seriesNameFormat: '{{model}} Mean'
+        "0_5":
+            kind: Panel
+            spec:
+                display:
+                    name: Throughput (tokens/sec)
+                    description: Total output tokens generated per second across all concurrent requests in the load test.
+                plugin:
+                    kind: TimeSeriesChart
+                    spec:
+                        legend:
+                            mode: table
+                            position: bottom
+                            values:
+                                - mean
+                                - last-number
+                        visual:
+                            areaOpacity: 0.1
+                            connectNulls: false
+                            display: line
+                            lineWidth: 2
+                queries:
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                datasource:
+                                    kind: PrometheusDatasource
+                                query: llm_load_test_throughput_tokens_per_sec{model=~"$model", namespace=~"$namespace"}
+                                seriesNameFormat: '{{model}}'
+        "0_6":
+            kind: Panel
+            spec:
+                display:
+                    name: Total Failures
+                    description: Absolute count of failed requests in each load test run.
+                plugin:
+                    kind: TimeSeriesChart
+                    spec:
+                        legend:
+                            mode: table
+                            position: bottom
+                            values:
+                                - mean
+                                - last-number
+                        visual:
+                            areaOpacity: 0.1
+                            connectNulls: false
+                            display: line
+                            lineWidth: 2
+                        yAxis:
+                            format:
+                                unit: decimal
+                queries:
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                datasource:
+                                    kind: PrometheusDatasource
+                                query: llm_load_test_total_failures{model=~"$model", namespace=~"$namespace"}
+                                seriesNameFormat: '{{model}}'
+        "0_7":
+            kind: Panel
+            spec:
+                display:
+                    name: Total Requests
+                    description: Total number of requests sent in each load test run.
+                plugin:
+                    kind: TimeSeriesChart
+                    spec:
+                        legend:
+                            mode: table
+                            position: bottom
+                            values:
+                                - mean
+                                - last-number
+                        visual:
+                            areaOpacity: 0.1
+                            connectNulls: false
+                            display: line
+                            lineWidth: 2
+                        yAxis:
+                            format:
+                                unit: decimal
+                queries:
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                datasource:
+                                    kind: PrometheusDatasource
+                                query: llm_load_test_total_requests{model=~"$model", namespace=~"$namespace"}
+                                seriesNameFormat: '{{model}}'
+        "0_8":
+            kind: Panel
+            spec:
+                display:
+                    name: Mean Input Tokens
+                    description: Average number of input (prompt) tokens per request in the load test.
+                plugin:
+                    kind: TimeSeriesChart
+                    spec:
+                        legend:
+                            mode: table
+                            position: bottom
+                            values:
+                                - mean
+                                - last-number
+                        visual:
+                            areaOpacity: 0.1
+                            connectNulls: false
+                            display: line
+                            lineWidth: 2
+                        yAxis:
+                            format:
+                                unit: decimal
+                            label: tokens
+                queries:
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                datasource:
+                                    kind: PrometheusDatasource
+                                query: llm_load_test_input_tokens_mean{model=~"$model", namespace=~"$namespace"}
+                                seriesNameFormat: '{{model}}'
+        "0_9":
+            kind: Panel
+            spec:
+                display:
+                    name: Mean Output Tokens
+                    description: Average number of output (generated) tokens per request in the load test.
+                plugin:
+                    kind: TimeSeriesChart
+                    spec:
+                        legend:
+                            mode: table
+                            position: bottom
+                            values:
+                                - mean
+                                - last-number
+                        visual:
+                            areaOpacity: 0.1
+                            connectNulls: false
+                            display: line
+                            lineWidth: 2
+                        yAxis:
+                            format:
+                                unit: decimal
+                            label: tokens
+                queries:
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                datasource:
+                                    kind: PrometheusDatasource
+                                query: llm_load_test_output_tokens_mean{model=~"$model", namespace=~"$namespace"}
+                                seriesNameFormat: '{{model}}'
+        "1_0":
+            kind: Panel
+            spec:
+                display:
+                    name: Power Usage (watts)
+                plugin:
+                    kind: TimeSeriesChart
+                    spec:
+                        legend:
+                            mode: list
+                            position: bottom
+                            values: []
+                        visual:
+                            areaOpacity: 0
+                            connectNulls: false
+                            display: line
+                            lineWidth: 1
+                queries:
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                datasource:
+                                    kind: PrometheusDatasource
+                                query: DCGM_FI_DEV_POWER_USAGE
+                                seriesNameFormat: '{{device}}'
+        "1_1":
+            kind: Panel
+            spec:
+                display:
+                    name: GPU Utilization (%)
+                plugin:
+                    kind: TimeSeriesChart
+                    spec:
+                        legend:
+                            mode: list
+                            position: bottom
+                            values: []
+                        visual:
+                            areaOpacity: 0
+                            connectNulls: false
+                            display: line
+                            lineWidth: 1
+                        yAxis:
+                            format:
+                                unit: percent
+                queries:
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                datasource:
+                                    kind: PrometheusDatasource
+                                query: DCGM_FI_DEV_GPU_UTIL
+                                seriesNameFormat: '{{device}}'
+        "1_2":
+            kind: Panel
+            spec:
+                display:
+                    name: GPU Memory Copy Utilization (%)
+                plugin:
+                    kind: TimeSeriesChart
+                    spec:
+                        legend:
+                            mode: list
+                            position: bottom
+                            values: []
+                        visual:
+                            areaOpacity: 0
+                            connectNulls: false
+                            display: line
+                            lineWidth: 1
+                        yAxis:
+                            format:
+                                unit: percent
+                queries:
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                datasource:
+                                    kind: PrometheusDatasource
+                                query: DCGM_FI_DEV_MEM_COPY_UTIL
+                                seriesNameFormat: '{{device}}'
+        "1_3":
+            kind: Panel
+            spec:
+                display:
+                    name: GPU Temperature (°C)
+                plugin:
+                    kind: TimeSeriesChart
+                    spec:
+                        legend:
+                            mode: list
+                            position: bottom
+                            values: []
+                        visual:
+                            areaOpacity: 0
+                            connectNulls: false
+                            display: line
+                            lineWidth: 1
+                queries:
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                datasource:
+                                    kind: PrometheusDatasource
+                                query: DCGM_FI_DEV_GPU_TEMP
+                                seriesNameFormat: '{{device}}'
+        "1_4":
+            kind: Panel
+            spec:
+                display:
+                    name: GPU Avg. Temp
+                plugin:
+                    kind: GaugeChart
+                    spec:
+                        calculation: mean
+                        max: 100
+                        thresholds:
+                            steps:
+                                - color: '#73bf69'
+                                  value: 0
+                                - color: '#EAB839'
+                                  value: 83
+                                - color: '#f2495c'
+                                  value: 87
+                queries:
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                datasource:
+                                    kind: PrometheusDatasource
+                                query: avg(DCGM_FI_DEV_GPU_TEMP)
+                                seriesNameFormat: ""
+        "1_5":
+            kind: Panel
+            spec:
+                display:
+                    name: Nodes with unhealthy GPUs
+                    description: Autopilot labeled nodes with unhealthy GPUs
+                plugin:
+                    kind: TimeSeriesChart
+                    spec:
+                        legend:
+                            mode: list
+                            position: bottom
+                            values: []
+                        visual:
+                            areaOpacity: 0
+                            connectNulls: false
+                            display: line
+                            lineWidth: 1
+                queries:
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                datasource:
+                                    kind: PrometheusDatasource
+                                query: kube_node_labels{label_autopilot_ibm_com_gpuhealth=~".*ERR.*"} and kube_node_labels{label_autopilot_ibm_com_gpuhealth!~""}
+        "1_6":
+            kind: Panel
+            spec:
+                display:
+                    name: Nodes with Low PCIe Bandwidth (<3.4 GB/s)
+                plugin:
+                    kind: Table
+                    spec:
+                        columnSettings:
+                            - name: node
+                              width: 273
+                        density: compact
+                queries:
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                datasource:
+                                    kind: PrometheusDatasource
+                                query: avg(avg_over_time(autopilot_health_checks{health=~"pciebw"}[12h])) by (node, deviceid) < 3.4
+                                seriesNameFormat: ""
+    layouts:
+        - kind: Grid
+          spec:
+            display:
+                title: LLM Load Test
+                collapse:
+                    open: true
+            items:
+                - x: 0
+                  "y": 1
+                  width: 8
+                  height: 9
+                  content:
+                    $ref: '#/spec/panels/0_0'
+                - x: 8
+                  "y": 1
+                  width: 8
+                  height: 9
+                  content:
+                    $ref: '#/spec/panels/0_1'
+                - x: 16
+                  "y": 1
+                  width: 8
+                  height: 9
+                  content:
+                    $ref: '#/spec/panels/0_2'
+                - x: 0
+                  "y": 10
+                  width: 8
+                  height: 9
+                  content:
+                    $ref: '#/spec/panels/0_3'
+                - x: 8
+                  "y": 10
+                  width: 8
+                  height: 9
+                  content:
+                    $ref: '#/spec/panels/0_4'
+                - x: 16
+                  "y": 10
+                  width: 8
+                  height: 9
+                  content:
+                    $ref: '#/spec/panels/0_5'
+                - x: 0
+                  "y": 19
+                  width: 8
+                  height: 8
+                  content:
+                    $ref: '#/spec/panels/0_6'
+                - x: 8
+                  "y": 19
+                  width: 6
+                  height: 8
+                  content:
+                    $ref: '#/spec/panels/0_7'
+                - x: 14
+                  "y": 19
+                  width: 5
+                  height: 8
+                  content:
+                    $ref: '#/spec/panels/0_8'
+                - x: 19
+                  "y": 19
+                  width: 5
+                  height: 8
+                  content:
+                    $ref: '#/spec/panels/0_9'
+        - kind: Grid
+          spec:
+            display:
+                title: GPU Metrics
+                collapse:
+                    open: true
+            items:
+                - x: 0
+                  "y": 28
+                  width: 12
+                  height: 8
+                  content:
+                    $ref: '#/spec/panels/1_0'
+                - x: 12
+                  "y": 28
+                  width: 6
+                  height: 8
+                  content:
+                    $ref: '#/spec/panels/1_1'
+                - x: 18
+                  "y": 28
+                  width: 6
+                  height: 8
+                  content:
+                    $ref: '#/spec/panels/1_2'
+                - x: 0
+                  "y": 36
+                  width: 6
+                  height: 7
+                  content:
+                    $ref: '#/spec/panels/1_3'
+                - x: 6
+                  "y": 36
+                  width: 6
+                  height: 7
+                  content:
+                    $ref: '#/spec/panels/1_4'
+                - x: 12
+                  "y": 36
+                  width: 6
+                  height: 7
+                  content:
+                    $ref: '#/spec/panels/1_5'
+                - x: 18
+                  "y": 36
+                  width: 6
+                  height: 7
+                  content:
+                    $ref: '#/spec/panels/1_6'
+    duration: 1h
+
